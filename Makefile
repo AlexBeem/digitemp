@@ -9,14 +9,12 @@
 # To disable Lockfile support on Linux, chenage LOCK to no
 #
 
-VERSION = 3.5.0
-
+VERSION = 3.6.0
 
 CC	= gcc
-CFLAGS	= -I./src -I./userial -O2 # -g -Wall
-LIBS	= -lm
+CFLAGS	= -I./src -I./userial -O2 -Wall # -g
 
-OBJS		=	src/digitemp.o src/device_name.o
+OBJS		=	src/digitemp.o src/device_name.o src/ds2438.o
 HDRS		= 	src/digitemp.h src/device_name.h
 
 # Common userial header/source
@@ -162,23 +160,3 @@ dist_ds9097u:	ds9097u sign archive
 
 dist_ds2490:	ds2490 sign archive
 		cd .. && mv digitemp-$(VERSION).tar.gz digitemp-$(VERSION)-ds2490.tar.gz
-
-# Build RedHat binary and source RPMs
-rpm_ds9097:	source
-	su -c "cp ../digitemp-$(VERSION).tar.gz /usr/src/redhat/SOURCES"
-	rm -f digitemp-$(VERSION)-1.spec
-	ln -s digitemp_9097.spec digitemp-$(VERSION)-1.spec
-	su -c "rpmbuild -ba -vv digitemp-$(VERSION)-1.spec"
-
-rpm_ds9097u:	source
-	su -c "cp ../digitemp-$(VERSION).tar.gz /usr/src/redhat/SOURCES"
-	rm -f digitemp-$(VERSION)-1.spec
-	ln -s digitemp_9097u.spec digitemp-$(VERSION)-1.spec
-	su -c "rpmbuild -ba -vv digitemp-$(VERSION)-1.spec"
-
-rpm_ds2490:	source
-	su -c "cp ../digitemp-$(VERSION).tar.gz /usr/src/redhat/SOURCES"
-	rm -f digitemp-$(VERSION)-1.spec
-	ln -s digitemp_2490.spec digitemp-$(VERSION)-1.spec
-	su -c "rpmbuild -ba -vv digitemp-$(VERSION)-1.spec"
-

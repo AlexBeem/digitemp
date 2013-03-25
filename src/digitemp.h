@@ -30,17 +30,22 @@
 #define OPT_WALK     0x0020
 #define OPT_DS2438   0x0040
 #define OPT_SORT     0x0080
+#define OPT_TEST     0x0100
 
 
 /* Family codes for supported devices */
 #define DS1820_FAMILY	0x10
 #define DS1822_FAMILY	0x22
 #define DS18B20_FAMILY	0x28
+#define DS28EA00_FAMILY 0x42
 #define DS1923_FAMILY   0x41
 #define DS2406_FAMILY   0x12
 #define DS2422_FAMILY	0x1C
 #define DS2423_FAMILY	0x1D
 #define DS2438_FAMILY   0x26
+// and non-supported yet, but coming soon
+#define DS2408_FAMILY	0x29
+#define DS2413_FAMILY	0x3A
 
 
 /* Coupler related definitions */
@@ -106,7 +111,10 @@ void printSN( unsigned char *TempSN, int crlf );
 int Walk1Wire();
 int sercmp( unsigned char *sn1, unsigned char *sn2 );
 int Init1WireLan( struct _roms *sensor_list );
+int read_pio_ds28ea00( int sensor_family, int sensor );
 
+/* From ds2438.c */
+int get_ibl_type(int portnum, unsigned char page, int offset);
 
 /* Local Variables: */
 /* mode: C */

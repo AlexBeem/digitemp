@@ -247,7 +247,6 @@ int owReadByte(int portnum)
 int owSpeed(int portnum, SMALLINT new_speed)
 {
 	int result; 
-	char retval;
 	char buffer[0x20];
 
 	/* issue the command to enable speed changes */
@@ -305,7 +304,6 @@ int owSpeed(int portnum, SMALLINT new_speed)
 int owLevel(int portnum, SMALLINT new_level)
 {
 	int result; 
-	char retval;
 	char buffer[0x20];
 	unsigned int  pulse;
 	

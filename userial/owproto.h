@@ -78,4 +78,12 @@ SMALLINT ReadCounter(int,int,ulong *);
 
 /* From ad26.c */
 double Get_Temperature(int portnum);
-float Volt_Reading(int portnum, int vdd);
+float Volt_Reading(int portnum, int vdd, int *cad);
+int PIO_Reading(int portnum, int pionum /* TS ignored so far */ );
+
+/* From XXXlnk.c */
+SMALLINT owTouchBit(int,SMALLINT);
+SMALLINT owSpeed(int,SMALLINT);
+SMALLINT owTouchByte(int portnum, SMALLINT sendbyte);
+SMALLINT owProgramPulse(int portnum);
+

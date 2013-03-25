@@ -108,7 +108,7 @@ SMALLINT owNext(int portnum, SMALLINT do_reset, SMALLINT alarm_only)
    uchar bit_test, search_direction, bit_number;
    uchar last_zero, serial_byte_number, next_result;
    uchar serial_byte_mask;
-   uchar lastcrc8;
+   uchar lastcrc8=0;
 
    // initialize for search
    bit_number = 1;

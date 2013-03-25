@@ -107,6 +107,9 @@ char *device_name( unsigned int family )
     case 0x28:
       return "DS18B20 Temperature Sensor";
 
+    case 0x29:
+      return "DS2408 8-Channel Addressable Switch";
+
     case 0x2C:
       return "DS2890 Single Channel Digital Potentiometer";
       
@@ -116,8 +119,14 @@ char *device_name( unsigned int family )
     case 0x33:
       return "DS2432/DS1961S 1K EEPROM with SHA-1 Engine";
 
+    case 0x3A:
+      return "DS2413 Dual Channel Addressable Switch";
+
     case 0x41:
       return "DS1923 Hygrochron Temperature/Humidity Logger with 8kB Data Log Memory";
+
+    case 0x42:
+      return "DS28EA00 Temperature Sensor with Sequence Detect and PIO";
 
     case 0x82:
       return "DS1425 Multi iButton";

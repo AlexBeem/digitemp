@@ -1,5 +1,5 @@
-DigiTemp v3.5.0 Frequently Asked Questions
-Copyright 1996-2007 by Brian C. Lane <bcl@brianlane.com>
+DigiTemp v3.6.0 Frequently Asked Questions
+Copyright 1996-2008 by Brian C. Lane <bcl@brianlane.com>
 http://www.brianlane.com
 http://www.digitemp.com
 
@@ -167,5 +167,7 @@ Q. Will the DS2490 USB to 1-wire adapter work?
 
    Maybe. I have reports of varying levels of success with it. On my Debian
    Sarge system using libusb 1.4 it does not work. On my Fedora Core 3 
-   laptop it ...
+   laptop it worked sometimes. On OSX it does not work. Some people report that
+   it works fine for them, others are like me and have mixed results.
+
 

@@ -31,6 +31,7 @@
 #include "ownet.h"
 #include <usb.h>
 #include <string.h>
+#include "digitemp.h"
 
 
 SMALLINT owAcquire(int,char *, char *);
@@ -41,6 +42,9 @@ struct usb_dev_handle *usb_dev_handle_list[MAX_PORTNUM];
 struct usb_device *usb_dev_list[MAX_PORTNUM];
 int usb_num_devices = -1;
 int initted_flag = 0;
+
+extern int opts;            // Command line options
+
 
 //---------------------------------------------------------------------------
 // Initialize the DS2490
@@ -63,9 +67,12 @@ void usb_ds2490_init(void)
 			//		dev->descriptor.idVendor, dev->descriptor.idProduct);
 			if (dev->descriptor.idVendor == 0x04FA &&
 					dev->descriptor.idProduct == 0x2490) {
-				printf("Found DS2490 device #%d at %s/%s\n", ++usb_num_devices + 1,
-						bus->dirname, dev->filename);
+                ++usb_num_devices;
 				usb_dev_list[usb_num_devices] = dev;
+
+				if( !(opts & OPT_QUIET) )
+  				    printf("Found DS2490 device #%d at %s/%s\n", usb_num_devices + 1,
+						    bus->dirname, dev->filename);
 			}
 		}
 	}

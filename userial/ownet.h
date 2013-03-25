@@ -140,6 +140,7 @@
          typedef unsigned long  ulong;
       #endif
       #if defined(DARWIN)
+         typedef unsigned short ushort;
          typedef unsigned long  ulong;
       #endif
    #endif

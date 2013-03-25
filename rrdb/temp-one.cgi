@@ -106,7 +106,7 @@ RRDp::cmd "graph - --imgformat PNG",
     "--width $width --height $height",
     "DEF:temp_c=$rrd:$var:AVERAGE",
     "CDEF:temp_f=temp_c,9,*,5,/,32,+",
-    "LINE1:temp_f#$color:'$label'";
+    "LINE1:temp_f$color:'$label'";
 
 $answer=RRDp::read;
 

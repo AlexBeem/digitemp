@@ -1,4 +1,4 @@
-.TH DIGITEMP 1 "June 2005"
+.TH DIGITEMP 1 "August 2008"
 .\" Some roff macros, for reference:
 .\" .nh        disable hyphenation
 .\" .hy        enable hyphenation
@@ -10,7 +10,7 @@
 .\" .sp <n>    insert n+1 empty lines
 .\" for manpage-specific macros, see man(7)
 .SH NAME
-digitemp \- program to read from temperature sensors. 
+digitemp \- program to read from 1-wire temperature sensors. 
 .SH SYNOPSIS
 .B digitemp
 .RI [ options ] 
@@ -24,7 +24,8 @@ It also handles the DS2406 1-wire hub switches, and DS2422 and DS2423
 counters.
 .PP
 DigiTemp uses either the DS9097 passive serial port adapter, or the
-DS2480B based DS9097U adapter (recommended).
+DS2480B based DS9097U adapter. 1-wire adapters from ibuttonlink.com,
+such as the Link45 are also supported.
 .SH OPTIONS
 At least 1 action must be given, along with some optional arguments. Actions
 are one (and only on) of the 
@@ -40,12 +41,17 @@ Show verbose output.
 .B \-i 
 Initialize .digitemprc file, search the bus for all supported devices.
 .TP
+.B \-I
+Initialize .digitemprc file, search the bus for all supported devices, store devices
+in sorted serial # order.
+.TP
 .B \-w
 Walk the full device tree and display the serial number and type of all
 devices detected on the bus.
 .TP
 .B \-s /dev/ttyS0
-Set serial port to use. Make sure you have permission to access this port.
+Set serial port to use. Make sure you have permission to access this port. For USB
+operation pass USB instead of /dev/ttySX
 .TP
 .B \-l /var/log/temperature
 Send output to logfile, the output format is defined by the .B \-o
@@ -62,7 +68,7 @@ about 750mS to do the temperature conversion. Default is 1000mS (1 sec).
 .TP
 .B \-t #
 Read sensor number #, the # depends on the order of the sensors in the
-.digitemprc file.
+\&.digitemprc file.
 .TP
 .B \-q
 Quiet output, no copyright banner.
@@ -71,7 +77,7 @@ Quiet output, no copyright banner.
 Read all sensors.
 .TP
 .B \-A
-Treat DS2438 as A/D converter, output raw voltages
+Treat DS2438 as A/D converter, output raw voltages and currents.
 .TP
 .B \-d 5
 Delay between samples (in seconds).
@@ -125,9 +131,10 @@ output of: May 24 21:25:43 Sensor 0 C: 23.66 F: 74.59
 .PP
 The DS2438 sensor can be used for a variety of things. It includes a 
 temperature sensor and A/D converter. DigiTemp defaults to using it as a
-humidity sensor. The raw voltages can be displayed by passing the -A argument
+humidity sensor. The raw voltages and currents can be displayed by passing 
+the \-A argument
 .PP
-When the -o2 or -o3 log options are used the attached DS2438's temperatures
+When the \-o2 or \-o3 log options are used the attached DS2438's temperatures
 will be output without the humidity.
 .PP
 .SH
@@ -151,9 +158,8 @@ with the addition of this format specifier:
 is the humidity in 0-100%
 .PP
 .SH AUTHOR
-This manual page was written by Jesús Roncero <jesus@roncero.org>,
+This manual page was written by Jes\['u]s Roncero <jesus@roncero.org>,
 for the Debian project (but may be used by others). Modifications by Brian
 C. Lane <bcl@brianlane.com>
 .SH UPDATES
 DigiTemp updates can be found on the http://www.digitemp.com website.
-

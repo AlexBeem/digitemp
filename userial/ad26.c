@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include "ownet.h"
 #include "ad26.h"
+#include "owproto.h"
 
 
 extern int   owBlock(int,int,uchar *,int);
@@ -46,7 +47,7 @@ extern int   owAccess(int);
 
 
 int Volt_AD(int portnum, int vdd);
-float Volt_Reading(int portnum, int vdd);
+float Volt_Reading(int portnum, int vdd, int *cad);
 double Get_Temperature(int portnum);
 
 int Volt_AD(int portnum, int vdd)
@@ -99,6 +100,10 @@ int Volt_AD(int portnum, int vdd)
       else
          return FALSE;
 
+      /*
+       * Avoid writing to status if needed --ro
+       */
+
       test = send_block[2] & 0x08;
       if(((test == 0x08) && vdd) || ((test == 0x00) && !(vdd)))
          return TRUE;
@@ -121,6 +126,15 @@ int Volt_AD(int portnum, int vdd)
 
       for(i=0;i<7;i++)
          send_block[send_cnt++] = send_block[i+4];
+
+      /*
+       * Turn on CAD sampling and turn off CA and EE functions 
+       * for our use for less glitches
+       */
+
+      send_block[2] |= 0x1;
+      send_block[2] &= ~0x4;
+      send_block[2] &= ~0x2;
 
       if(owBlock(portnum,FALSE,send_block,send_cnt))
       {
@@ -153,7 +167,7 @@ int Volt_AD(int portnum, int vdd)
 }
       
 
-float Volt_Reading(int portnum, int vdd)
+float Volt_Reading(int portnum, int vdd, int *cad)
 {
    uchar send_block[50];
    int send_cnt=0;
@@ -163,6 +177,7 @@ float Volt_Reading(int portnum, int vdd)
    ushort volts;
    float ret=-1.0;
    int done = TRUE;
+   uchar c;
 
    do
    {
@@ -171,6 +186,7 @@ float Volt_Reading(int portnum, int vdd)
 
          if(owAccess(portnum))
          {
+	   /*  Convert V */
             if(!owWriteByte(portnum,0xB4))
             {
 /*               output_status(LV_ALWAYS,(char *)"DIDN'T WRITE CORRECTLY\n"); */
@@ -225,12 +241,23 @@ float Volt_Reading(int portnum, int vdd)
                return ret;    
       
             if((!vdd) && ((send_block[2] & 0x08) == 0x08))
-               done = FALSE;
+	      continue;
             else
                done = TRUE;
 
             volts = (send_block[6] << 8) | send_block[5];
             ret = (float) volts/100;
+
+	    if(cad) {
+
+	      /* Get Current reading as well */
+	      c = send_block[8] & 0x3;
+
+	      *cad =  (c << 8) | send_block[7];
+	      if(send_block[8] & 0x4) *cad =  - *cad;
+
+	      //	      printf("CAD=%d\n", *cad);
+	    }
          }//Access
       }
    } while(!done);
@@ -312,5 +339,92 @@ double Get_Temperature(int portnum)
    }//Access
 
    return ret;
+}
+
+/* ---- DS2406 PIO input by Tomasz R. Surmacz (tsurmacz@ict.pwr.wroc.pl) ---- */
+int PIO_Reading(int portnum, int pionum /* TS ignored so far */ )
+{
+   uchar send_block[50];
+   int send_cnt=0;
+   int i;
+   short unsigned int infoByte, pioByte;
+   ushort lastcrc16 = 0;
+   int ret=0;
+   int done = 3; // max tries if CRC error
+
+   while (done-->0)
+   {
+         if(owAccess(portnum))
+         {
+            // Recall the Status/Configuration page
+            // Recall command
+            send_block[send_cnt++] = 0xF5; // (b8) Channel access
+
+            // Channel Control Byte 1 
+            send_block[send_cnt++] = 0xCD; // ALR IM tog ic, CHS1 CHS0 crc1 CRC0
+		    // CHS1 CHS0 = 01 = Channels A and B
+		    // ic: 0: asynchronous sampling, 1: synchronous
+		    // tog IM: 00: Write all bits to channel, 01: read all bits
+		    // ALR = 1 ==> reset activity latch
+		    // crc1crc0: 0: no crc, 1: after every byte, 2: every 8B, 3: 32B
+
+            // Channel Control Byte 2 - reserved
+            send_block[send_cnt++] = 0x00; // reserved
+
+            if(!owBlock(portnum,FALSE,send_block,send_cnt))
+               return ret;
+
+	        // receive Channel Info Byte
+            infoByte = (send_block[send_cnt++] = owReadByte(portnum)) & 0xff;
+		    // bit7: supply indication Vcc (0 = no supply)
+		    // bit6: no. of channels, 0 = channel A only
+		    // bit5: PIO-B activity latch
+		    // bit4: PIO-A activity latch
+		    // bit3: PIO-B sensed level
+		    // bit2: PIO-A sensed leve
+		    // bit1: PIO-B Channel Flip-Flop Q
+		    // bit0: PIO-A Channel Flip-Flop Q
+
+	        // Receive PIO Byte(s) until Master TX Reset
+            pioByte = send_block[send_cnt++] = owReadByte(portnum);
+
+	        // read and check CRC
+            setcrc16(portnum,0);
+            for(i=0;i<send_cnt;i++) {
+		        lastcrc16 = docrc16(portnum,send_block[i]);
+		        // DEBUG:
+		        // printf("  crc[%i]: %02x -> %04x (~%04x)\n", i, send_block[i], lastcrc16, lastcrc16 ^0xffff);
+		    }
+
+	        lastcrc16 ^= owReadByte(portnum);		// CRC16, lsb
+	        lastcrc16 ^= (owReadByte(portnum) << 8);	// CRC16, msb
+	        lastcrc16 ^= 0xffff;
+
+	        // DEBUG:
+	        // printf("  crc: %04x (~%04x)\n", lastcrc16, lastcrc16 ^0xffff);
+
+		    if(lastcrc16 != 0x0000) {
+			    printf("DS2406 crc error\n");
+			    continue;
+		    }
+
+	        // reset bus and end reading PIO status
+	        owTouchReset(portnum);
+	        return ret=(infoByte <<8) + pioByte;
+
+	        // returns sampled data in LSB (bits 7-0), status byte in bits 15-8
+	        // when reading both ports, (sampled bits are b3a3b2a2b1a1b0a0 or: 
+		    // LSB should be 0x00 for A=0, B=0
+		    // 0xAA for A=0, B=1 
+		    // 0x55 for A=1, B=0
+		    // 0xFF for A=1, B=1
+	        // status byte: 0x43 == 2-pio device, parasite powered, A=B=0
+		    // 0x03 == 1-pio device, parasite powered
+		    // 0xC3, 0x83 - Vdd-powered, 2 or 1 pio device
+        } // Access
+	    // printf("  DS2406 access error\n");
+    } // while(done)
+
+    return -1;
 }
 

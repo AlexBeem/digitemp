@@ -123,10 +123,10 @@ use vars qw($opt_c $opt_f $opt_t $opt_w $opt_F $opt_C
 
 
 # Predefined exit codes for NetSaint
-%exit_codes   = ('UNKNOWN' ,-1,
-		      'OK'      , 0,
-                      'WARNING' , 1,
-                      'CRITICAL', 2,);
+%exit_codes   = (   'OK'      , 0,
+                    'WARNING' , 1,
+                    'CRITICAL', 2,
+                    'UNKNOWN' ,3,);
 
 # Default to Fahrenheit input and result (use -C to change this)
 $temp_fmt = 3;
